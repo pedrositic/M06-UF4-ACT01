@@ -1,0 +1,43 @@
+2
+1
+Barcelona
+Madrid
+0
+n
+3
+1
+4
+1
+AVE S-100
+0
+Renfe
+n
+2
+1
+1
+1
+0
+4
+1
+AVE S-100
+1
+1
+Sants
+0
+2
+1
+Barcelona
+Madrid
+1
+1
+Sants
+0
+3
+1
+1
+0
+4
+1
+AVE S-100
+0
+0

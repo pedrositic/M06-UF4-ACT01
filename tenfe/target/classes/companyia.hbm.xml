@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.iticbcn.paupedros.model">
+    <class name="Companyia" table="companyia">
+        <id name="id" type="long">
+            <column name="id"/>
+            <generator class="identity"/>
+        </id>
+        <property name="nom" type="string">
+            <column name="nom" not-null="true"/>
+        </property>
+        <set name="trens" inverse="true" fetch="join">
+            <key column="companyia_id"/>
+            <one-to-many class="Tren"/>
+        </set>
+    </class>
+</hibernate-mapping>

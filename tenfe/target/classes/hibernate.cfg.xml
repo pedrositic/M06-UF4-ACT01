@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+  <session-factory>
+    <!-- Configuración de la base de datos -->
+    <property name="connection.driver_class">org.mariadb.jdbc.Driver</property>
+    <property name="connection.url">jdbc:mariadb://localhost:3309/tenfe2</property>
+    <property name="connection.username">root</property>
+    <property name="connection.password">system</property>
+
+    <!-- Configuración de Hibernate -->
+    <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+    <property name="show_sql">true</property>
+    <property name="hbm2ddl.auto">update</property>
+
+    <!-- Mapeo de las entidades -->
+    <mapping class="com.iticbcn.paupedros.model.Tren" />
+    <mapping class="com.iticbcn.paupedros.model.Trajecte" />
+    <mapping class="com.iticbcn.paupedros.model.Estacio" />
+
+    <mapping resource="companyia.hbm.xml"/>
+  </session-factory>
+</hibernate-configuration>
