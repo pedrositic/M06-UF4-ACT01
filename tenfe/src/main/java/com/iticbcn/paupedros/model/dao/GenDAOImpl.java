@@ -31,7 +31,7 @@ public abstract class GenDAOImpl<T> implements GenDAO<T> {
         try (Session ses = sessionFactory.openSession()) {
             ses.beginTransaction();
             try {
-                ses.persist(entity);
+                ses.merge(entity);
                 ses.getTransaction().commit();
             } catch (JDBCException jdbcex) {
                 handleException(ses, jdbcex, "Error de JDBC");
