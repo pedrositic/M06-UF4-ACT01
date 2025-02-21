@@ -21,7 +21,7 @@ public class Tren {
 
   private String model;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "companyia_id", nullable = false)
   private Companyia companyia;
 

@@ -1,5 +1,6 @@
 package com.iticbcn.paupedros;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -157,61 +158,82 @@ public class Main {
 
     // Implementació dels mètodes per afegir, mostrar, actualitzar i esborrar
     private static void afegirCompanyia(Scanner scanner, CompanyiaDAO companyiaDAO) {
-        System.out.println("Introdueix el nom de la companyia:");
-        String nom = scanner.nextLine();
-        Companyia companyia = new Companyia(nom);
-        companyiaDAO.crearCompanyia(companyia);
-        System.out.println("Companyia afegida.");
+        try {
+            System.out.println("Introdueix el nom de la companyia:");
+            String nom = scanner.nextLine();
+            Companyia companyia = new Companyia(nom);
+            companyiaDAO.save(companyia);
+            System.out.println("Companyia afegida.");
 
-        System.out.println("Vols afegir tren? (s/n)");
-        String resposta = scanner.nextLine();
+            System.out.println("Vols afegir tren? (s/n)");
+            String resposta = scanner.nextLine();
 
-        if (resposta.equalsIgnoreCase("s")) {
-            TrenDAO tdao = new TrenDAO(sessionFactory);
-            Tren tren = afegirTrenToCompanyia(scanner, tdao, companyia.getId());
-            companyia.addTren(tren);
+            if (resposta.equalsIgnoreCase("s")) {
+                TrenDAO tdao = new TrenDAO(sessionFactory);
+                Tren tren = afegirTrenToCompanyia(scanner, tdao, companyia.getId());
+                companyia.addTren(tren);
+                companyiaDAO.update(companyia);
+            }
+            System.err.println(companyia);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en afegir la companyia.");
         }
-        System.err.println(companyia);
     }
 
     private static void mostrarCompanyiaPerID(Scanner scanner, CompanyiaDAO companyiaDAO) {
-        System.out.println("Introduce el ID de la compañía:");
-        Long id = scanner.nextLong();
-        scanner.nextLine(); // Consumir salto de línea
-        Companyia companyia = companyiaDAO.obtenirCompanyia(id);
-        if (companyia != null) {
-            System.out.println("Compañía encontrada: " + companyia.getNom());
-        } else {
-            System.out.println("No se ha encontrado ninguna compañía con el ID proporcionado.");
+        try {
+            System.out.println("Introduce el ID de la compañía:");
+            Long id = scanner.nextLong();
+            scanner.nextLine(); // Consumir salto de línea
+            Companyia companyia = companyiaDAO.get(id);
+            if (companyia != null) {
+                System.out.println("Compañía encontrada: " + companyia.getNom());
+            } else {
+                System.out.println("No se ha encontrado ninguna compañía con el ID proporcionado.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en mostrar la companyia.");
         }
     }
 
     private static void actualitzarCompanyia(Scanner scanner, CompanyiaDAO companyiaDAO) {
-        System.out.println("Introdueix l'ID de la companyia a actualitzar:");
-        Long id = scanner.nextLong();
-        Companyia companyia = companyiaDAO.obtenirCompanyia(id);
-        if (companyia != null) {
-            System.out.println("Introdueix el nou nom per a la companyia:");
-            scanner.nextLine();
-            String nouNom = scanner.nextLine();
-            companyia.setNom(nouNom);
-            companyiaDAO.actualitzarCompanyia(companyia);
-            System.out.println("Companyia actualitzada amb èxit.");
-        } else {
-            System.out.println("No s'ha trobat cap companyia amb l'ID proporcionat.");
+        try {
+            System.out.println("Introdueix l'ID de la companyia a actualitzar:");
+            Long id = scanner.nextLong();
+            Companyia companyia = companyiaDAO.get(id);
+            if (companyia != null) {
+                System.out.println("Introdueix el nou nom per a la companyia:");
+                scanner.nextLine();
+                String nouNom = scanner.nextLine();
+                companyia.setNom(nouNom);
+                companyiaDAO.update(companyia);
+                System.out.println("Companyia actualitzada amb èxit.");
+            } else {
+                System.out.println("No s'ha trobat cap companyia amb l'ID proporcionat.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en actualitzar la companyia.");
         }
     }
 
     private static void esborrarCompanyia(Scanner scanner, CompanyiaDAO companyiaDAO) {
-        System.out.println("Introdueix l'ID de la companyia a eliminar:");
-        Long id = scanner.nextLong();
-        scanner.nextLine(); // Consumir salt de línia
-        Companyia companyia = companyiaDAO.obtenirCompanyia(id);
-        if (companyia != null) {
-            companyiaDAO.eliminarCompanyia(companyia);
-            System.out.println("Companyia eliminada amb èxit.");
-        } else {
-            System.out.println("No s'ha trobat cap companyia amb l'ID proporcionat.");
+        try {
+            System.out.println("Introdueix l'ID de la companyia a eliminar:");
+            Long id = scanner.nextLong();
+            scanner.nextLine(); // Consumir salt de línia
+            Companyia companyia = companyiaDAO.get(id);
+            if (companyia != null) {
+                companyiaDAO.delete(companyia);
+                System.out.println("Companyia eliminada amb èxit.");
+            } else {
+                System.out.println("No s'ha trobat cap companyia amb l'ID proporcionat.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en eliminar la companyia.");
         }
     }
 
@@ -234,13 +256,18 @@ public class Main {
             Long trenId = scanner.nextLong();
             scanner.nextLine(); // Consumir salt de línia
 
-            Tren tren;
+            Tren tren = null;
             if (trenId == 0) {
                 // Crear un nou tren
                 tren = afegirTren(scanner, trenDAO);
             } else {
                 // Obtenir un tren existent
-                tren = trenDAO.obtenirTren(trenId);
+                try {
+                    tren = trenDAO.get(trenId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("Error en obtenir el tren.");
+                }
                 if (tren == null) {
                     System.out.println("No s'ha trobat cap tren amb l'ID proporcionat.");
                     return;
@@ -261,13 +288,17 @@ public class Main {
                 Long estacioId = scanner.nextLong();
                 scanner.nextLine(); // Consumir salt de línia
 
-                Estacio estacio;
+                Estacio estacio = null;
                 if (estacioId == 0) {
                     // Crear una nova estació
                     estacio = afegirEstacio(scanner, estacioDAO);
                 } else {
                     // Obtenir una estació existent
-                    estacio = estacioDAO.obtenirEstacio(estacioId);
+                    try {
+                        estacio = estacioDAO.get(estacioId);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     if (estacio == null) {
                         System.out.println("No s'ha trobat cap estació amb l'ID proporcionat.");
                         continue; // Tornem a preguntar per una estació vàlida
@@ -286,9 +317,14 @@ public class Main {
             }
         }
 
-        // Guardem el trajecte a la base de dades
-        trajecteDAO.crearTrajecte(trajecte);
-        System.out.println("Trajecte creat amb èxit.");
+        try {
+            // Guardem el trajecte a la base de dades
+            trajecteDAO.save(trajecte);
+            System.out.println("Trajecte creat amb èxit.");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println("Error en afegir el trajecte.");
+        }
     }
 
     private static void mostrarTrajectePerID(Scanner scanner, TrajecteDAO trajecteDAO) {
@@ -296,7 +332,13 @@ public class Main {
         Long id = scanner.nextLong();
         scanner.nextLine(); // Consumir salt de línia
 
-        Trajecte trajecte = trajecteDAO.obtenirTrajecte(id);
+        Trajecte trajecte = null;
+        try {
+            trajecte = trajecteDAO.get(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en obtenir el trajecte.");
+        }
         if (trajecte != null) {
             System.out.println("Trajecte trobat:");
             System.out.println("ID: " + trajecte.getId());
@@ -321,7 +363,13 @@ public class Main {
     }
 
     private static void mostrarTotsElsTrajectes(TrajecteDAO trajecteDAO) {
-        List<Trajecte> trajectes = trajecteDAO.obtenirTotsElsTrajectes();
+        List<Trajecte> trajectes = new ArrayList<>();
+        try {
+            trajectes = trajecteDAO.getAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en obtenir els trajectes.");
+        }
         if (trajectes.isEmpty()) {
             System.out.println("No hi ha cap trajecte disponible.");
         } else {
@@ -349,7 +397,13 @@ public class Main {
         Long id = scanner.nextLong();
         scanner.nextLine(); // Consumir salt de línia
 
-        Trajecte trajecte = trajecteDAO.obtenirTrajecte(id);
+        Trajecte trajecte = null;
+        try {
+            trajecte = trajecteDAO.get(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en obtenir el trajecte.");
+        }
         if (trajecte != null) {
             System.out.println("Introdueix el nou origen del trajecte:");
             String nouOrigen = scanner.nextLine();
@@ -360,7 +414,12 @@ public class Main {
             trajecte.setOrigen(nouOrigen);
             trajecte.setDesti(nouDesti);
 
-            trajecteDAO.actualitzarTrajecte(trajecte);
+            try {
+                trajecteDAO.update(trajecte);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error en actualitzar el trajecte.");
+            }
             System.out.println("Trajecte actualitzat amb èxit.");
         } else {
             System.out.println("No s'ha trobat cap trajecte amb l'ID proporcionat.");
@@ -372,10 +431,21 @@ public class Main {
         Long id = scanner.nextLong();
         scanner.nextLine(); // Consumir salt de línia
 
-        Trajecte trajecte = trajecteDAO.obtenirTrajecte(id);
+        Trajecte trajecte = null;
+        try {
+            trajecte = trajecteDAO.get(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en obtenir el trajecte.");
+        }
         if (trajecte != null) {
-            trajecteDAO.eliminarTrajecte(trajecte);
-            System.out.println("Trajecte eliminat amb èxit.");
+            try {
+                trajecteDAO.delete(trajecte);
+                System.out.println("Trajecte eliminat amb èxit.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error en eliminar el trajecte.");
+            }
         } else {
             System.out.println("No s'ha trobat cap trajecte amb l'ID proporcionat.");
         }
@@ -386,7 +456,11 @@ public class Main {
         String nom = scanner.nextLine();
 
         Estacio estacio = new Estacio(nom);
-        estacioDAO.crearEstacio(estacio);
+        try {
+            estacioDAO.save(estacio);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         System.out.println("Estació afegida amb èxit.");
         return estacio;
     }
@@ -396,11 +470,15 @@ public class Main {
         Long id = scanner.nextLong();
         scanner.nextLine(); // Consumir salt de línia
 
-        Estacio estacio = estacioDAO.obtenirEstacio(id);
-        if (estacio != null) {
-            System.out.println("Estació trobada: " + estacio.getNom());
-        } else {
-            System.out.println("No s'ha trobat cap estació amb l'ID proporcionat.");
+        try {
+            Estacio estacio = estacioDAO.get(id);
+            if (estacio != null) {
+                System.out.println("Estació trobada: " + estacio.getNom());
+            } else {
+                System.out.println("No s'ha trobat cap estació amb l'ID proporcionat.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -409,16 +487,21 @@ public class Main {
         Long id = scanner.nextLong();
         scanner.nextLine(); // Consumir salt de línia
 
-        Estacio estacio = estacioDAO.obtenirEstacio(id);
-        if (estacio != null) {
-            System.out.println("Introdueix el nou nom per a l'estació:");
-            String nouNom = scanner.nextLine();
+        try {
+            Estacio estacio = estacioDAO.get(id);
+            if (estacio != null) {
+                System.out.println("Introdueix el nou nom per a l'estació:");
+                String nouNom = scanner.nextLine();
 
-            estacio.setNom(nouNom);
-            estacioDAO.actualitzarEstacio(estacio);
-            System.out.println("Estació actualitzada amb èxit.");
-        } else {
-            System.out.println("No s'ha trobat cap estació amb l'ID proporcionat.");
+                estacio.setNom(nouNom);
+                estacioDAO.update(estacio);
+                System.out.println("Estació actualitzada amb èxit.");
+            } else {
+                System.out.println("No s'ha trobat cap estació amb l'ID proporcionat.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("S'ha produït un error en actualitzar l'estació.");
         }
     }
 
@@ -427,12 +510,17 @@ public class Main {
         Long id = scanner.nextLong();
         scanner.nextLine(); // Consumir salt de línia
 
-        Estacio estacio = estacioDAO.obtenirEstacio(id);
-        if (estacio != null) {
-            estacioDAO.eliminarEstacio(estacio);
-            System.out.println("Estació eliminada amb èxit.");
-        } else {
-            System.out.println("No s'ha trobat cap estació amb l'ID proporcionat.");
+        try {
+            Estacio estacio = estacioDAO.get(id);
+            if (estacio != null) {
+                estacioDAO.delete(estacio);
+                System.out.println("Estació eliminada amb èxit.");
+            } else {
+                System.out.println("No s'ha trobat cap estació amb l'ID proporcionat.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("S'ha produït un error en eliminar l'estació.");
         }
     }
 
@@ -441,7 +529,7 @@ public class Main {
         String model = scanner.nextLine();
 
         CompanyiaDAO cdao = new CompanyiaDAO(sessionFactory);
-        Companyia comp;
+        Companyia comp = null;
 
         if (id == null) {
             System.out.println("ID Companyia:");
@@ -449,11 +537,26 @@ public class Main {
             scanner.nextLine();
         }
 
-        comp = cdao.obtenirCompanyia(id);
+        try {
+            comp = cdao.get(id);
+            if (comp == null) {
+                System.out.println("No s'ha trobat la companyia.");
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en obtenir la companyia.");
+            return null;
+        }
 
         Tren tren = new Tren(model, comp);
-        trenDAO.crearTren(tren);
-        System.out.println("Tren añadido con éxito.");
+        try {
+            trenDAO.save(tren);
+            System.out.println("Tren añadido con éxito.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en afegir el tren.");
+        }
         return tren;
     }
 
@@ -465,7 +568,13 @@ public class Main {
     private static void mostrarTrenPerID(Scanner scanner, TrenDAO trenDAO) {
         System.out.println("Introduce el ID del tren:");
         Long id = scanner.nextLong();
-        Tren tren = trenDAO.obtenirTren(id);
+        Tren tren = null;
+        try {
+            tren = trenDAO.get(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en obtenir el tren.");
+        }
         if (tren != null) {
             System.out.printf("Tren encontrado: %s\n", tren);
         } else {
@@ -478,12 +587,23 @@ public class Main {
         Long id = scanner.nextLong();
         scanner.nextLine();
 
-        Tren tren = trenDAO.obtenirTren(id);
+        Tren tren = null;
+        try {
+            tren = trenDAO.get(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en obtenir el tren.");
+        }
         if (tren != null) {
             System.out.println("Introdueix el nou model per al tren:");
             String nouModel = scanner.nextLine();
             tren.setModel(nouModel);
-            trenDAO.actualitzarTren(tren);
+            try {
+                trenDAO.update(tren);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error en actualitzar el tren.");
+            }
             System.out.println("Tren actualitzat amb èxit.");
         } else {
             System.out.println("No s'ha trobat cap tren amb l'ID proporcionat.");
@@ -495,9 +615,20 @@ public class Main {
         Long id = scanner.nextLong();
         scanner.nextLine();
 
-        Tren tren = trenDAO.obtenirTren(id);
+        Tren tren = null;
+        try {
+            tren = trenDAO.get(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en obtenir el tren.");
+        }
         if (tren != null) {
-            trenDAO.eliminarTren(tren);
+            try {
+                trenDAO.delete(tren);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error en eliminar el tren.");
+            }
             System.out.println("Tren eliminat amb èxit.");
         } else {
             System.out.println("No s'ha trobat cap tren amb l'ID proporcionat.");
